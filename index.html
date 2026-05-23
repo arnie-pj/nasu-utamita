@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>照瑚なすch 歌枠検索</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0ecf7;
+    --accent: #9b7fd4;
+    --accent2: #c9b8f0;
+    --text: #3a2d5c;
+    --text2: #7a6ea0;
+    --card-normal: #dceeff;
+    --card-normal-border: #b0d0f5;
+    --card-vc: #fde8f0;
+    --card-vc-border: #f0b8d0;
+    --shadow: rgba(100,80,160,0.12);
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(180,150,230,0.18) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(200,170,240,0.15) 0%, transparent 50%);
+  }
+
+  header {
+    background: linear-gradient(135deg, #7c5cbf 0%, #a880e0 50%, #c9a0f0 100%);
+    padding: 32px 24px 24px;
+    text-align: center;
+    box-shadow: 0 4px 24px rgba(120,80,200,0.2);
+  }
+
+  header h1 {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    color: #fff;
+    letter-spacing: 0.08em;
+    text-shadow: 0 2px 8px rgba(60,30,100,0.3);
+    margin-bottom: 20px;
+  }
+
+  .search-wrap {
+    max-width: 600px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .search-wrap input {
+    width: 100%;
+    padding: 14px 48px 14px 20px;
+    border-radius: 50px;
+    border: none;
+    font-size: 1rem;
+    font-family: 'Noto Sans JP', sans-serif;
+    background: rgba(255,255,255,0.92);
+    color: var(--text);
+    box-shadow: 0 4px 16px rgba(80,40,160,0.2);
+    outline: none;
+    transition: box-shadow 0.2s;
+  }
+
+  .search-wrap input:focus {
+    box-shadow: 0 4px 24px rgba(120,80,200,0.4);
+  }
+
+  .search-wrap .search-icon {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2rem;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .tabs-container {
+    display: flex;
+    gap: 8px;
+    padding: 20px 24px 0;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+  }
+
+  .tab {
+    padding: 10px 20px;
+    border-radius: 50px;
+    border: 2px solid var(--accent2);
+    background: transparent;
+    color: var(--text2);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .tab:hover { background: var(--accent2); color: var(--text); }
+
+  .tab.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(120,80,200,0.3);
+  }
+
+  .legend {
+    display: flex;
+    gap: 16px;
+    padding: 12px 24px 0;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.82rem;
+    color: var(--text2);
+  }
+
+  .legend-dot { width: 14px; height: 14px; border-radius: 4px; }
+  .legend-dot.normal { background: var(--card-normal); border: 1.5px solid var(--card-normal-border); }
+  .legend-dot.vc     { background: var(--card-vc);     border: 1.5px solid var(--card-vc-border); }
+
+  .main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 24px 40px;
+  }
+
+  .section-label {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text2);
+    margin-bottom: 16px;
+    letter-spacing: 0.05em;
+    min-height: 1.4em;
+  }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+
+  .card {
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    animation: fadeIn 0.3s ease both;
+  }
+
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px var(--shadow);
+  }
+
+  .card.normal {
+    background: var(--card-normal);
+    border: 1.5px solid var(--card-normal-border);
+    box-shadow: 0 2px 12px rgba(100,140,220,0.1);
+  }
+
+  .card.vc {
+    background: var(--card-vc);
+    border: 1.5px solid var(--card-vc-border);
+    box-shadow: 0 2px 12px rgba(220,100,140,0.1);
+  }
+
+  .card-thumb-wrap {
+    flex: 0 0 96px;
+    padding: 7px 0 7px 7px;
+    display: flex;
+    align-items: center;
+  }
+
+  .card-thumb {
+    width: 96px;
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    display: block;
+    border-radius: 6px;
+    background: #d8cef0;
+  }
+
+  .card-body {
+    flex: 1;
+    padding: 8px 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .card-title {
+    font-size: 1.0rem;
+    font-weight: 700;
+    line-height: 1.45;
+    margin-bottom: 5px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-all;
+  }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .card-ts {
+    font-size: 0.75rem;
+    color: var(--text2);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .badge-vc {
+    font-size: 0.68rem;
+    padding: 2px 7px;
+    border-radius: 20px;
+    background: #f5b8d0;
+    color: #8c3060;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+
+  .vote-banner {
+    max-width: 1200px;
+    margin: 16px auto 0;
+    padding: 0 24px;
+  }
+
+  .vote-banner a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, #ff6fa8 0%, #ff9fd2 60%, #ffb8e0 100%);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 50px;
+    padding: 12px 24px;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: clamp(0.78rem, 2vw, 0.95rem);
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    box-shadow: 0 4px 18px rgba(255,80,140,0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+    line-height: 1.5;
+  }
+
+  .vote-banner a:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(255,80,140,0.4);
+  }
+
+  .vote-banner .vote-icon {
+    font-size: 1.4rem;
+    flex-shrink: 0;
+  }
+
+  footer {
+    background: linear-gradient(135deg, #7c5cbf 0%, #a880e0 100%);
+    text-align: center;
+    padding: 24px 16px;
+    margin-top: 20px;
+  }
+
+  footer a {
+    color: rgba(255,255,255,0.92);
+    text-decoration: none;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+    transition: color 0.2s;
+  }
+
+  footer a:hover { color: #fff; text-decoration: underline; }
+
+  footer .footer-name {
+    font-size: 1rem;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 4px;
+    color: #fff;
+  }
+
+  .no-results {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text2);
+    font-size: 1rem;
+  }
+  #loadingOverlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    z-index: 999;
+    transition: opacity 0.4s;
+  }
+
+  #loadingOverlay.hidden { opacity: 0; pointer-events: none; }
+
+  .spinner {
+    width: 40px; height: 40px;
+    border: 4px solid var(--accent2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  .loading-text {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    color: var(--text2);
+    font-size: 0.95rem;
+    text-align: center;
+    max-width: 320px;
+    line-height: 1.6;
+  }
+
+  @keyframes spin   { to { transform: rotate(360deg); } }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+
+<!-- ローディングオーバーレイ -->
+<div id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">データを読み込み中...</div>
+</div>
+
+<header>
+  <h4>🗻🦅あなたの好きな曲もきっとある🍆🎶</h4>
+  <h1>照瑚なすさん 歌ってみた検索</h1>
+  <font color="white">
+    「1富士2鷹3茄子、いつかはなりたい1茄子」でおなじみ、バ美肉アンドロイドVtuber照瑚なすさんの歌声をもっと楽しもう！<br>
+    自分が好きなあの曲は歌ってるかなぁ。そんな要望にお答えして、なすさんの歌枠を曲名で横断検索できるサイトを作りました。<br>
+    なすさんの歌声をもっともーっと全身で浴びようぞっ！！</font>
+  <br><br>
+  <div class="search-wrap">
+    <input type="search" id="searchInput" placeholder="曲名・動画タイトルで検索..." autocomplete="off">
+    <span class="search-icon">🔍</span>
+  </div>
+</header>
+
+<div class="vote-banner">
+  <a href="https://ec.v-tamp.com/events/utawaku_gp_3/rank_bord/tereko_nasu" target="_blank" rel="noopener noreferrer">
+    <span class="vote-icon">🗳️</span>
+    <span>第3回歌枠グランプリ終了！長期間に渡りおつなすでした！！</span>
+  </a>
+</div>
+
+<div class="tabs-container" id="tabsContainer">
+  <button class="tab active" data-tab="mv">■ Music Video</button>
+  <button class="tab" data-tab="live">■ 歌枠</button>
+  <button class="tab" data-tab="pending">■ 歌枠（タイムスタンプ準備中）</button>
+</div>
+
+<div class="legend">
+  <span class="legend-item"><span class="legend-dot normal"></span>地声</span>
+  <span class="legend-item"><span class="legend-dot vc"></span>ボイチェン</span>
+</div>
+
+<div class="main">
+  <div id="sectionLabel" class="section-label"></div>
+  <div class="cards-grid" id="cardsGrid"></div>
+  <div id="noResults" class="no-results" style="display:none;">該当するコンテンツが見つかりませんでした</div>
+</div>
+
+<footer>
+  <a href="https://www.youtube.com/@tereko-nasu" target="_blank" rel="noopener noreferrer">
+    <span class="footer-name">このページのコンテンツは全て、照瑚なすch -TEREKO NASU- さんのリンクになっています</span>
+    <span>https://www.youtube.com/@tereko-nasu</span>
+  </a>
+  <br>
+  <span>created by ani （絶叫農家の1人）</span>
+</footer>
+
+<script>
+// ============================================================
+// UTILITIES
+// ============================================================
+
+function getVideoId(url) {
+  const m = url.match(/[?&]v=([^&\s]+)/);
+  return m ? m[1] : null;
+}
+
+function thumbUrl(videoId) {
+  return `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
+}
+
+/** タイムスタンプ文字列（例: "1:23:45" or "4:56"）を秒数に変換 */
+function tsToSeconds(ts) {
+  const parts = ts.trim().split(':').map(Number);
+  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  if (parts.length === 2) return parts[0] * 60 + parts[1];
+  return 0;
+}
+
+/** タイトルから末尾の装飾（絵文字・コメント等）を除去 */
+function cleanTitle(raw) {
+  return raw
+    .replace(/[🍆🌸✨💫⭐🎵🎶🎤🎸🎹🥁🎷🎺🪗🎻🎼🎙️🔊🍑]+.*$/u, '')
+    .replace(/＜[^\s]*/g, '')
+    .trim();
+}
+
+// ============================================================
+// DATABASE PARSER
+// ============================================================
+
+/**
+ * databaseテキストを解析してアイテム配列を返す
+ * @returns {{ mvItems: Item[], liveItems: Item[], pendingItems: Item[] }}
+ *
+ * Item = { videoId, url, contentTitle, isVoicechanger, timestamp }
+ */
+function parseDatabase(text) {
+  const lines       = text.split('\n').map(l => l.trim());
+  const mvItems      = [];
+  const liveItems    = [];
+  const pendingItems = [];
+
+  // タイムスタンプ行にマッチ: 先頭が「数字:数字」で始まる
+  const TS_RE = /^(\d+:\d+(?::\d+)?)\s+(.+)$/;
+
+  let section    = null;
+  let currentUrl = null;
+  let currentVc  = false;
+
+  for (const line of lines) {
+    if (!line) continue;
+
+    // ---- セクションヘッダ ----
+    // 「タイムスタンプ準備中」を先に判定（「歌ってみた枠」の部分一致を避けるため）
+    if (line.includes('タイムスタンプ準備中')) {
+      section = 'pending'; currentUrl = null; continue;
+    }
+    if (line === '■Music Video') {
+      section = 'mv'; currentUrl = null; continue;
+    }
+    if (line === '■歌ってみた枠') {
+      section = 'live'; currentUrl = null; continue;
+    }
+
+    // ---- URL行 ----
+    if (line.startsWith('https://')) {
+      currentUrl = line;
+      currentVc  = false; // URLが変わったらボイチェンフラグをリセット
+
+      if (section === 'mv') {
+        const vid = getVideoId(currentUrl);
+        if (vid) mvItems.push({ videoId: vid, url: currentUrl, contentTitle: null, isVoicechanger: false, timestamp: null });
+        currentUrl = null;
+      } else if (section === 'pending') {
+        const vid = getVideoId(currentUrl);
+        if (vid) pendingItems.push({ videoId: vid, url: currentUrl, contentTitle: null, isVoicechanger: false, timestamp: null });
+        currentUrl = null;
+      }
+      // live セクションは後続のタイムスタンプ行を待つ
+      continue;
+    }
+
+    // ---- ボイチェン行（URLの直下） ----
+    if (section === 'live' && line === 'ボイチェン') {
+      currentVc = true;
+      continue;
+    }
+
+    // ---- タイムスタンプ行（歌ってみた枠） ----
+    if (section === 'live' && currentUrl) {
+      const m = TS_RE.exec(line);
+      if (m) {
+        const ts    = m[1];
+        const title = cleanTitle(m[2]);
+        const secs  = tsToSeconds(ts);
+        const vid   = getVideoId(currentUrl);
+        if (vid) {
+          liveItems.push({
+            videoId:        vid,
+            url:            `https://www.youtube.com/watch?v=${vid}&t=${secs}`,
+            contentTitle:   title || m[2],
+            isVoicechanger: currentVc,
+            timestamp:      ts,
+          });
+        }
+      }
+    }
+  }
+
+  return { mvItems, liveItems, pendingItems };
+}
+
+// ============================================================
+// YOUTUBE タイトル取得（noembed）
+// ============================================================
+
+const videoInfoCache = {};
+
+async function fetchVideoInfo(videoId) {
+  if (videoInfoCache[videoId]) return videoInfoCache[videoId];
+  try {
+    const res  = await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`);
+    const data = await res.json();
+    const info = { title: data.title || '' };
+    videoInfoCache[videoId] = info;
+    return info;
+  } catch {
+    const info = { title: '' };
+    videoInfoCache[videoId] = info;
+    return info;
+  }
+}
+
+// ============================================================
+// STATE
+// ============================================================
+
+let mvItems      = [];
+let liveItems    = [];
+let pendingItems = [];
+let activeTab    = 'mv';
+let searchQuery  = '';
+
+// ============================================================
+// RENDER
+// ============================================================
+
+function makeCard(item) {
+  const info   = videoInfoCache[item.videoId] || {};
+  const title  = item.contentTitle || info.title || item.videoId;
+  const isVC   = item.isVoicechanger || !!(info.title && info.title.includes('ボイチェン'));
+
+  const card = document.createElement('a');
+  card.className = `card ${isVC ? 'vc' : 'normal'}`;
+  card.href      = item.url;
+  card.target    = '_blank';
+  card.rel       = 'noopener noreferrer';
+
+  const thumbWrap = document.createElement('div');
+  thumbWrap.className = 'card-thumb-wrap';
+
+  const thumb = document.createElement('img');
+  thumb.className = 'card-thumb';
+  thumb.loading   = 'lazy';
+  thumb.src       = thumbUrl(item.videoId);
+  thumb.alt       = title;
+  thumbWrap.appendChild(thumb);
+
+  const body    = document.createElement('div');
+  body.className = 'card-body';
+
+  const titleEl    = document.createElement('div');
+  titleEl.className = 'card-title';
+  titleEl.textContent = title;
+
+  const meta    = document.createElement('div');
+  meta.className = 'card-meta';
+
+  if (item.timestamp) {
+    const tsEl    = document.createElement('span');
+    tsEl.className = 'card-ts';
+    tsEl.textContent = item.timestamp;
+    meta.appendChild(tsEl);
+  }
+
+  if (isVC) {
+    const badge    = document.createElement('span');
+    badge.className = 'badge-vc';
+    badge.textContent = 'ボイチェン';
+    meta.appendChild(badge);
+  }
+
+  body.appendChild(titleEl);
+  body.appendChild(meta);
+  card.appendChild(thumbWrap);
+  card.appendChild(body);
+  return card;
+}
+
+function render() {
+  const grid      = document.getElementById('cardsGrid');
+  const noResults = document.getElementById('noResults');
+  const label     = document.getElementById('sectionLabel');
+  const tabs      = document.getElementById('tabsContainer');
+  grid.innerHTML  = '';
+
+  const q = searchQuery.trim().toLowerCase();
+
+  let items;
+  if (q) {
+    tabs.style.opacity = '0.5';
+    items = [...mvItems, ...liveItems, ...pendingItems].filter(item => {
+      const info = videoInfoCache[item.videoId] || {};
+      const ct   = (item.contentTitle || '').toLowerCase();
+      const vt   = (info.title || '').toLowerCase();
+      return ct.includes(q) || vt.includes(q);
+    });
+    label.textContent = `「${searchQuery}」の検索結果 ${items.length}件`;
+  } else {
+    tabs.style.opacity = '1';
+    if      (activeTab === 'mv')      items = mvItems;
+    else if (activeTab === 'live')    items = liveItems;
+    else                              items = pendingItems;
+    const names = {
+      mv:      '■ Music Video',
+      live:    '■ 歌枠',
+      pending: '■ 歌枠（タイムスタンプ準備中）',
+    };
+    label.textContent = `${names[activeTab]} — ${items.length}件`;
+  }
+
+  if (items.length === 0) {
+    noResults.style.display = 'block';
+  } else {
+    noResults.style.display = 'none';
+    items.forEach((item, i) => {
+      const card = makeCard(item);
+      card.style.animationDelay = `${Math.min(i * 0.02, 0.6)}s`;
+      grid.appendChild(card);
+    });
+  }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    activeTab   = tab.dataset.tab;
+    searchQuery = '';
+    document.getElementById('searchInput').value = '';
+    render();
+  });
+});
+
+document.getElementById('searchInput').addEventListener('input', e => {
+  searchQuery = e.target.value;
+  render();
+});
+
+(async () => {
+  // Step 1: databaseファイルをfetchして解析
+  try {
+    const res = await fetch('./database');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text   = await res.text();
+    const parsed = parseDatabase(text);
+    mvItems      = parsed.mvItems;
+    liveItems    = parsed.liveItems;
+    pendingItems = parsed.pendingItems;
+  } catch (err) {
+    console.error('database 読み込みエラー:', err);
+    document.getElementById('loadingText').textContent =
+      'データの読み込みに失敗しました。\ndatabaseファイルがindex.htmlと同じディレクトリにあるか確認してください。\n（ローカルのfile://では動作しません。GitHub Pages等のサーバーが必要です）';
+    return;
+  }
+
+  // Step 2: ローディング非表示・初期描画（カード枠のみ先に表示）
+  const overlay = document.getElementById('loadingOverlay');
+  overlay.classList.add('hidden');
+  setTimeout(() => overlay.remove(), 500);
+  render();
+
+  // Step 3: バックグラウンドでYouTubeタイトルを順次取得、取得のたびに再描画
+  const allIds = [...new Set([
+    ...mvItems.map(i => i.videoId),
+    ...liveItems.map(i => i.videoId),
+    ...pendingItems.map(i => i.videoId),
+  ])];
+
+  const BATCH_SIZE = 5;
+  for (let i = 0; i < allIds.length; i += BATCH_SIZE) {
+    await Promise.allSettled(
+      allIds.slice(i, i + BATCH_SIZE).map(id => fetchVideoInfo(id))
+    );
+    render();
+    await new Promise(r => setTimeout(r, 150));
+  }
+})();
+</script>
+</body>
+</html>
